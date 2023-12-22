@@ -1,0 +1,1 @@
+Node app for managing projects and work hours
