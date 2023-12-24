@@ -1,3 +1,25 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/output.css' />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <title>Log In</title>
+    <% console.log(error.stack) %>
+</head>
+
+<body class="bg-slate-950 w-screen min-h-screen grid items-center">
+    <main class="w-full max-w-md mx-auto px-6 py-20">
+        <h1 class="text-6xl font-bold text-gray-900 dark:text-white"><%= error.status %></h1>
+        <h1 class="mb-20 text-6xl font-bold text-gray-900 dark:text-white"><%= message %></h1>
+        <% if (error.status === 404) { %>
+            <img src="/images/undraw_page_not_found_re_e9o6.svg" alt="404 error illustration">
+        <% } else { %>
+            <img src="/images/undraw_notify_re_65on.svg" alt="error illustration">
+        <% } %>
+    </main>
+</body>
+
+</html>
