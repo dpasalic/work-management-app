@@ -113,4 +113,14 @@ router.post("/:id", verifyAdmin, editValidate, async (req, res) => {
     }
 });
 
+router.delete("/delete/:id", verifyAdmin, async (req, res) => {
+    try {
+        const result = await db.query("DELETE FROM Users WHERE id=$1", [req.params.id]);
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 module.exports = router;
