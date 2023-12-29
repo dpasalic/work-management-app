@@ -6,7 +6,12 @@ const { registerValidate, loginValidate, editValidate, generateToken, verifyAdmi
 
 router.get("/", async (req, res) => {
     try {
-        const result = await db.query("SELECT * FROM Users");
+        let result;
+        if (req.query.q) {
+            result = await db.query("SELECT * FROM Users WHERE first_name LIKE $1 OR last_name LIKE $1 OR email LIKE $1 ORDER BY id", [`%${req.query.q}%`]);
+        } else {
+            result = await db.query("SELECT * FROM Users");
+        }
         res.json(result.rows);
     } catch (err) {
         console.log(err);
@@ -102,10 +107,10 @@ router.post("/:id", verifyAdmin, editValidate, async (req, res) => {
             const hash = bcrypt.hashSync(password, salt);
 
             await db.query("UPDATE Users SET first_name=$1, last_name=$2, email=$3, password=$4, role=$5 WHERE id=$6", [firstName, lastName, email, hash, role, req.params.id]);
-            res.redirect("/admin_panel?msg=up");
+            res.redirect("/admin_panel?msg=ed");
         } else {
             await db.query("UPDATE Users SET first_name=$1, last_name=$2, email=$3, role=$4 WHERE id=$5", [firstName, lastName, email, role, req.params.id]);
-            res.redirect("/admin_panel?msg=up");
+            res.redirect("/admin_panel?msg=ed");
         }
     } catch (err) {
         console.log(err);

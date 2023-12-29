@@ -13,8 +13,8 @@ router.get("/admin_panel", verifyAdmin, async (req, res, next) => {
         const { rows } = await db.query("SELECT * FROM Users ORDER BY id");
         const msg = req.query.msg === "rg" ?
             "Registered a user successfully" :
-            req.query.msg === "up" ?
-                "Updated a user successfully" : "";
+            req.query.msg === "ed" ?
+                "Edited a user successfully" : "";
         res.render("admin_panel", { users: rows, msg: msg });
     } catch (err) {
         console.log(err);
