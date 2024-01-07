@@ -10,12 +10,18 @@ router.get('/', (req, res, next) => {
 
 router.get("/admin_panel", verifyAdmin, async (req, res, next) => {
     try {
-        const { rows } = await db.query("SELECT * FROM Users ORDER BY id");
+        const users = await db.query("SELECT * FROM Users ORDER BY id");
+        const projects = await db.query("SELECT * FROM Projects ORDER BY id");
+
         const msg = req.query.msg === "rg" ?
             "Registered a user successfully" :
             req.query.msg === "ed" ?
                 "Edited a user successfully" : "";
-        res.render("admin_panel", { users: rows, msg: msg });
+        res.render("admin-panel", {
+            users: users.rows,
+            projects: projects.rows,
+            msg: msg
+        });
     } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");

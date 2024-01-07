@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/output.css' />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>
+        <%= project.name %>
+    </title>
+</head>
+
+<body class="bg-slate-950 w-screen min-h-screen grid">
+    <main class="max-w-4xl mx-auto px-4 py-20">
+        <h1 class="mb-10 text-4xl font-bold text-gray-900 dark:text-white">
+            <%= project.name %>
+        </h1>
+
+        <section>
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-gray-500 dark:text-white">
+                    calendar_month
+                </span>
+                <span class="text-gray-500 dark:text-white">
+                    <%= new Date(project.start_date).toISOString().split("T")[0] %>
+                </span>
+                <span class="text-gray-500 dark:text-white"> - </span>
+                <span class="text-gray-500 dark:text-white">
+                    <%= new Date(project.end_date).toISOString().split("T")[0] %>
+                </span>
+                <% if (project.end_date < new Date()) { %>
+                    <span class="text-red-400 ml-auto">ended</span>
+                    <% } else { %>
+                        <span class="text-green-400 ml-auto">active</span>
+                        <% } %>
+            </div>
+            <div class="flex items-center gap-3 mt-4">
+                <span class="material-symbols-outlined text-gray-500 dark:text-white">
+                    person
+                </span>
+                <span class="text-gray-500 dark:text-white">
+                    <%= owner.first_name %>
+                    <%= owner.last_name %>
+                </span>
+                <span class="text-gray-500 dark:text-white">(<%= owner.role %>)</span>
+            </div>
+            <div class="text-gray-500 dark:text-white text-justify mt-4">
+                <%= project.description %>
+            </div>
+        </section>
+    </main>
+
+    <!-- <script src="/javascripts/spinner.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+
+</html>

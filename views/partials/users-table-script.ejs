@@ -1,0 +1,127 @@
+<script>
+    const usersTableBody = document.getElementById('users-table-body');
+    const users = JSON.parse('<%-JSON.stringify(users)%>');
+    createUsersTableBody(users);
+
+    let id; // global variable which holds clicked user's id
+    const usersSpinner = document.querySelector("#users-spinner #spinner");
+
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            id = btn.parentElement.parentElement.getAttribute("data-user-id");
+        });
+    });
+
+    function deleteUser() {
+        const msg = document.getElementById("msg");
+        usersSpinner.classList.remove("hidden");
+
+        axios.delete(`/users/delete/${id}`)
+            .then(res => {
+                if (res.status === 200) {
+                    document.querySelector(`[data-user-id="${id}"]`).remove();
+                    usersSpinner.classList.add("hidden");
+                    msg.innerHTML = "Deleted user successfully";
+                } else {
+                    throw new Error("Internal Server Error");
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
+    document.getElementById("users-search").addEventListener("input", e => {
+        searchUsers(e.target.value);
+    });
+    function displaySearchedUsers(data, val) {
+        if (!val) {
+            usersTableBody.innerHTML = null;
+            createUsersTableBody(users);
+        } else if (data.length === 0) {
+            usersTableBody.innerHTML = "No users found matching your search criteria.";
+        } else {
+            usersTableBody.innerHTML = null;
+            createUsersTableBody(data);
+        }
+    }
+    const searchUsers = debounce((val) => {
+        if (!val) {
+            displaySearchedUsers(users, val);
+            return;
+        }
+        usersSpinner.classList.remove("hidden");
+
+        axios.get(`/users?q=${val}`)
+            .then(res => {
+                displaySearchedUsers(res.data, val);
+                usersSpinner.classList.add("hidden");
+            })
+            .catch(err => console.log(err));
+    }, 500);
+    function debounce(callback, delay) {
+        let timer;
+        return function (val) {
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                callback(val);
+            }, delay)
+        }
+    }
+
+    function createUsersTableBody(users) {
+        users.forEach(user => createUsersTableRow(user));
+    }
+
+    function createUsersTableRow(user) {
+        const tr = document.createElement('tr');
+        tr.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
+        tr.dataset.userId = user.id;
+
+        const th = document.createElement('th');
+        th.setAttribute('scope', 'row');
+        th.className = 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white';
+        th.textContent = user.id;
+
+        const tdFirstName = createTd(user.first_name);
+
+        const tdLastName = createTd(user.last_name ? user.last_name : '/');
+
+        const tdEmail = createTd(user.email);
+
+        const tdRole = createTd(user.role);
+
+        const tdEditLink = document.createElement('td');
+        tdEditLink.className = 'px-6 py-4';
+        const link = document.createElement('a');
+        link.href = `/users/${user.id}`;
+        link.className = 'font-medium text-blue-600 dark:text-blue-500 hover:underline';
+        link.textContent = "edit";
+        tdEditLink.appendChild(link);
+
+        const tdDeleteButton = createTd();
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('data-modal-target', 'popup-modal');
+        button.setAttribute('data-modal-toggle', 'popup-modal');
+        button.className = 'delete-btn font-medium text-blue-600 dark:text-blue-500 hover:underline';
+        button.textContent = "delete";
+        tdDeleteButton.appendChild(button);
+
+        tr.appendChild(th);
+        tr.appendChild(tdFirstName);
+        tr.appendChild(tdLastName);
+        tr.appendChild(tdEmail);
+        tr.appendChild(tdRole);
+        tr.appendChild(tdEditLink);
+        tr.appendChild(tdDeleteButton);
+
+        usersTableBody.appendChild(tr);
+
+        function createTd(textContent = null) {
+            const td = document.createElement('td');
+            td.className = 'px-6 py-4';
+            td.textContent = textContent;
+
+            return td;
+        }
+    }
+</script>

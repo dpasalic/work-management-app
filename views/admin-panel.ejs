@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/output.css' />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js"
+        integrity="sha512-JWQFV6OCC2o2x8x46YrEeFEQtzoNV++r9im8O8stv91YwHNykzIS2TbvAlFdeH0GVlpnyd79W0ZGmffcRi++Bw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>Admin Panel</title>
+</head>
+
+<body class="admn-pnl-p bg-slate-950">
+    <h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
+
+    <main class="grid grid-cols-1 gap-3 xl:grid-cols-2 xl:items-start">
+        <%- include("partials/users-table.ejs") %>
+        <%- include("partials/projects-table.ejs") %>
+    </main>
+
+    <%- include("partials/users-table-script.ejs") %>
+    <%- include("partials/projects-table-script.ejs") %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+
+</html>

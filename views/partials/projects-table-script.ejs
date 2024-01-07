@@ -1,0 +1,76 @@
+<script>
+    const projectsTableBody = document.getElementById('projects-table-body');
+    const projects = JSON.parse('<%-JSON.stringify(projects)%>');
+    createProjectsTableBody(projects);
+
+    const projectsSpinner = document.querySelector("#projects-spinner #spinner");
+
+    document.getElementById("projects-search").addEventListener("input", e => {
+        searchProjects(e.target.value);
+        console.log(e.target.value);
+    });
+    function displaySearchedProjects(data, val) {
+        if (!val) {
+            projectsTableBody.innerHTML = null;
+            createProjectsTableBody(projects);
+        } else if (data.length === 0) {
+            projectsTableBody.innerHTML = "No projects found matching your search criteria.";
+        } else {
+            projectsTableBody.innerHTML = null;
+            createProjectsTableBody(data);
+        }
+    }
+    const searchProjects = debounce((val) => {
+        if (!val) {
+            displaySearchedProjects(projects, val);
+            return;
+        }
+        projectsSpinner.classList.remove("hidden");
+
+        axios.get(`/projects?q=${val}`)
+            .then(res => {
+                displaySearchedProjects(res.data, val);
+                projectsSpinner.classList.add("hidden");
+            })
+            .catch(err => console.log(err));
+    }, 500);
+
+    function createProjectsTableBody(projects) {
+        projects.forEach(project => createProjectsTableRow(project));
+    }
+
+    function createProjectsTableRow(project) {
+        const tr = document.createElement('tr');
+        tr.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
+        tr.dataset.projectId = project.id;
+
+        const th = document.createElement('th');
+        th.setAttribute('scope', 'row');
+        th.className = 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white';
+        th.textContent = project.id;
+
+        const tdName = createTd(project.name);
+
+        const tdViewLink = document.createElement('td');
+        tdViewLink.className = 'px-6 py-4';
+        const link = document.createElement('a');
+        link.href = `/projects/${project.id}`;
+        link.className = 'font-medium text-blue-600 dark:text-blue-500 hover:underline';
+        link.textContent = "view";
+        tdViewLink.appendChild(link);
+
+        tr.appendChild(th);
+        tr.appendChild(tdName);
+        tr.appendChild(tdViewLink);
+
+        projectsTableBody.appendChild(tr);
+
+        function createTd(textContent = null) {
+            const td = document.createElement('td');
+            td.className = 'px-6 py-4';
+            td.textContent = textContent;
+
+            return td;
+        }
+    }
+</script>

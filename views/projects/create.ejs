@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/output.css' />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
+    <title>Create Project</title>
+</head>
+
+<body class="bg-slate-950 w-screen min-h-screen grid md:items-center">
+    <main class="w-full max-w-md mx-auto px-4 py-20">
+        <h1 class="mb-10 text-4xl font-bold text-gray-900 dark:text-white">Create Project</h1>
+        <form action="/projects/create" method="POST" novalidate>
+            <div class="relative z-0 w-full mb-8 group">
+                <input type="text" name="name" id="name" placeholder=" " value="<%= formValues.name %>"
+                    aria-describedby="nameError"
+                    class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
+                <label for="name"
+                    class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                    Name</label>
+                <% if (getErrorMsg("name")) { %>
+                    <p id="nameError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+                        <span class="font-medium">
+                            <%= getErrorMsg("name") %>
+                        </span>
+                    </p>
+                    <% } %>
+            </div>
+
+
+            <div date-rangepicker class="flex items-top mb-5">
+                <div class="relative">
+                    <div class="absolute top-3 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                        </svg>
+                    </div>
+                    <input name="startDate" type="text"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Select start date">
+                    <% if (getErrorMsg("startDate")) { %>
+                        <p id="nameError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+                            <span class="font-medium">
+                                <%= getErrorMsg("startDate") %>
+                            </span>
+                        </p>
+                        <% } %>
+                </div>
+                <span class="relative top-2.5 mx-4 text-gray-500">to</span>
+                <div class="relative flex flex-col">
+                    <div class="absolute top-3 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                        </svg>
+                    </div>
+                    <input name="endDate" type="text"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Select end date">
+                    <% if (getErrorMsg("endDate")) { %>
+                        <p id="nameError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+                            <span class="font-medium">
+                                <%= getErrorMsg("endDate") %>
+                            </span>
+                        </p>
+                        <% } %>
+                </div>
+            </div>
+
+
+            <div class="mb-5">
+                <label for="description"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                <textarea name="description" id="description" rows="4"
+                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Write project description here..."></textarea>
+                <% if (getErrorMsg("description")) { %>
+                    <p id="nameError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+                        <span class="font-medium">
+                            <%= getErrorMsg("description") %>
+                        </span>
+                    </p>
+                    <% } %>
+            </div>
+
+
+            <button type="submit" id="submit-button"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+        </form>
+    </main>
+
+    <script src="/javascripts/spinner.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+
+</html>
