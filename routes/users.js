@@ -7,8 +7,10 @@ const { registerValidate, loginValidate, editValidate, generateToken, verifyAdmi
 router.get("/", async (req, res) => {
     try {
         let result;
-        if (req.query.q) {
-            result = await db.query("SELECT * FROM Users WHERE first_name LIKE $1 OR last_name LIKE $1 OR email LIKE $1 ORDER BY id", [`%${req.query.q}%`]);
+        if (req.query.w) {
+            result = await db.query("SELECT * FROM Users WHERE role=$1 AND (LOWER(first_name) LIKE $2 OR LOWER(last_name) LIKE $2) ORDER BY id", ["worker", `%${req.query.q}%`]);
+        } else if (req.query.q) {
+            result = await db.query("SELECT * FROM Users WHERE LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 OR LOWER(email) LIKE $1 ORDER BY id", [`%${req.query.q}%`]);
         } else {
             result = await db.query("SELECT * FROM Users");
         }

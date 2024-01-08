@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const db = require("../db");
 const { createValidate } = require("../public/javascripts/projects");
-const { verifyToken, verifyAdmin, verifyManager } = require("../public/javascripts/users");
+const { verifyToken, verifyAdmin, verifyManager, verifyWorker } = require("../public/javascripts/users");
 
 router.get("/", async (req, res) => {
     try {
@@ -39,15 +39,32 @@ router.post("/create", verifyManager, createValidate, async (req, res) => {
     }
 });
 
-router.get("/:id", verifyManager, async (req, res) => {
+router.get("/:id", verifyWorker, async (req, res) => {
     try {
         const project = await db.query("SELECT * FROM Projects WHERE id=$1", [req.params.id]);
         const owner = await db.query("SELECT * FROM Users WHERE id=$1", [project.rows[0].owner]);
-console.log(project.rows[0])
+        const workers = await db.query("SELECT * FROM user_projects up INNER JOIN users u ON up.user_id=u.id WHERE up.project_id=$1", [project.rows[0].id]);
+
+        if (req.user.role === "worker") {
+            
+        }
+
         res.render("projects/read", {
             project: project.rows[0],
-            owner: owner.rows[0]
+            owner: owner.rows[0],
+            user: req.user,
+            workers: workers.rows
         });
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+router.post("/:pId/:uId", verifyManager, async (req, res) => {
+    try {
+        const result = await db.query("INSERT INTO user_projects VALUES($1, $2)", [parseInt(req.params.uId), parseInt(req.params.pId)]);
+
+        res.json(result.rows[0]);
     } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");

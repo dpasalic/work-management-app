@@ -8,13 +8,16 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js"
+        integrity="sha512-JWQFV6OCC2o2x8x46YrEeFEQtzoNV++r9im8O8stv91YwHNykzIS2TbvAlFdeH0GVlpnyd79W0ZGmffcRi++Bw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <title>
         <%= project.name %>
     </title>
 </head>
 
 <body class="bg-slate-950 w-screen min-h-screen grid">
-    <main class="max-w-4xl mx-auto px-4 py-20">
+    <main class="max-w-7xl mx-auto px-4 py-20">
         <h1 class="mb-10 text-4xl font-bold text-gray-900 dark:text-white">
             <%= project.name %>
         </h1>
@@ -43,7 +46,7 @@
                 </span>
                 <span class="text-gray-500 dark:text-white">
                     <%= owner.first_name %>
-                    <%= owner.last_name %>
+                        <%= owner.last_name %>
                 </span>
                 <span class="text-gray-500 dark:text-white">(<%= owner.role %>)</span>
             </div>
@@ -51,9 +54,151 @@
                 <%= project.description %>
             </div>
         </section>
+
+        <section class="grid grid-cols-3 gap-3 items-start mt-10">
+            <div class="col-span-2 p-6 rounded-3xl bg-slate-900">
+                <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
+            </div>
+            <div class="p-6 rounded-3xl bg-slate-900">
+                <div class="flex justify-between items-start">
+                    <h2 class="w-40 mb-4 text-2xl font-bold text-gray-900 dark:text-white">Workers</h2>
+                    <div id="workers-spinner"><%- include ("../partials/spinner.ejs") %></div>
+                </div>
+
+                <% if (owner.id===user.id || user.role==="admin" ) { %>
+                    <div class="relative">
+                        <label for="add-worker"
+                            class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                                </svg>
+                            </div>
+                            <input type="search" id="add-worker"
+                                class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Add user...">
+                        </div>
+                        <div id="users-show" aria-live="polite"
+                            class="absolute top-14 w-full h-auto rounded-lg bg-gray-500 z-10 overflow-hidden"></div>
+                    </div>
+                    <% } %>
+
+                        <div class="relative overflow-x-auto rounded-lg">
+                            <table
+                                class="w-full mt-4 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead
+                                    class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 rounded-tl-lg">
+                                            Id
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 rounded-tr-lg">
+                                            Name
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="workers-table-body">
+                                    <% workers.forEach(worker=> { %>
+                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                            <th scope="row"
+                                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <%= worker.id %>
+                                            </th>
+                                            <td class="px-6 py-4">
+                                                <%= worker.first_name %>
+                                                    <%= worker.last_name %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+            </div>
+        </section>
     </main>
 
-    <!-- <script src="/javascripts/spinner.js"></script> -->
+    <script>
+        // implement adding user on client to workers list
+
+        const usersList = document.getElementById('users-show');
+
+        const workersSpinner = document.querySelector("#workers-spinner #spinner");
+
+        const workersInput = document.getElementById("add-worker");
+        workersInput.addEventListener("input", e => {
+            searchUsers(e.target.value);
+        });
+        function displaySearchedUsers(data, val) {
+            if (!val) {
+                usersList.innerHTML = null;
+            } else if (data.length === 0) {
+                const p = document.createElement("p");
+                p.innerHTML = "No users found matching your search criteria.";
+                p.className = "p-4 text-white";
+                usersList.innerHTML = null;
+                usersList.appendChild(p);
+            } else {
+                usersList.innerHTML = null;
+                createUsersList(data);
+            }
+        }
+        const searchUsers = debounce((val) => {
+            if (!val) {
+                usersList.innerHTML = null;
+                return;
+            }
+            workersSpinner.classList.remove("hidden");
+
+            axios.get(`/users?q=${val}&w=worker`)
+                .then(res => {
+                    displaySearchedUsers(res.data, val);
+                    workersSpinner.classList.add("hidden");
+                })
+                .catch(err => console.log(err));
+        }, 250);
+        function debounce(callback, delay) {
+            let timer;
+            return function (val) {
+                clearTimeout(timer)
+                timer = setTimeout(() => {
+                    callback(val);
+                }, delay)
+            }
+        }
+
+        function createUsersList(users) {
+            const ulElement = document.createElement("ul");
+            ulElement.className = "h-full list-none list-inside dark:text-white";
+
+            users.forEach((user, i) => {
+                const liElement = document.createElement("li");
+                liElement.addEventListener("click", () => {
+                    axios.post(`/projects/${window.location.pathname.slice(-2)}/${user.id}`)
+                        .then(res => {
+                            console.log(res.data)
+                            workersSpinner.classList.add("hidden");
+                        })
+                        .catch(err => console.log(err));
+
+                    workersInput.value = "";
+                    usersList.innerHTML = null;
+                });
+
+                if (i !== users.length) {
+                    liElement.className = "p-4 border-b border-gray-400 hover:bg-gray-600 cursor-pointer";
+                } else {
+                    liElement.className = "p-4 hover:bg-gray-600 cursor-pointer";
+                }
+                liElement.textContent = `${user.first_name} ${user.last_name}`;
+                ulElement.appendChild(liElement);
+            });
+
+            usersList.appendChild(ulElement);
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 </body>
 

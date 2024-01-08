@@ -143,6 +143,20 @@ function verifyManager(req, res, next) {
     req.user = decoded;
     next();
 }
+function verifyWorker(req, res, next) {
+    const decoded = verifyToken(req);
+
+    if (!decoded) {
+        return res.status(403).json({ message: "Invalid token" });
+    }
+
+    if (decoded.role !== "manager" && decoded.role !== "admin" && decoded.role !== "worker") {
+        return res.status(403).json({ message: "Insufficient permission" });
+    }
+
+    req.user = decoded;
+    next();
+}
 
 module.exports = {
     registerValidate,
@@ -151,5 +165,6 @@ module.exports = {
     generateToken,
     verifyToken,
     verifyAdmin,
-    verifyManager
+    verifyManager,
+    verifyWorker
 };
