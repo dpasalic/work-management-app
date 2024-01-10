@@ -18,11 +18,10 @@
 
 <body class="bg-slate-950 w-screen min-h-screen grid">
     <main class="max-w-7xl mx-auto px-4 py-20">
-        <h1 class="mb-10 text-4xl font-bold text-gray-900 dark:text-white">
-            <%= project.name %>
-        </h1>
-
-        <section>
+        <section class="p-6 rounded-3xl border dark:bg-gray-800 dark:border-gray-700">
+            <h1 class="mb-8 text-4xl font-bold text-gray-900 dark:text-white">
+                <%= project.name %>
+            </h1>
             <div class="flex items-center gap-3">
                 <span class="material-symbols-outlined text-gray-500 dark:text-white">
                     calendar_month
@@ -55,11 +54,34 @@
             </div>
         </section>
 
-        <section class="grid grid-cols-3 gap-3 items-start mt-10">
-            <div class="col-span-2 p-6 rounded-3xl bg-slate-900">
-                <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start mt-3">
+            <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <% if (owner.id===user.id || user.role==="admin" ) { %>
+                    <%- include("../partials/projects-task-modal.ejs") %>
+                        <% } %>
+
+                            <a href="#"
+                                class="block p-6 bg-white border border-gray-200 rounded-3xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+
+                                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                    Noteworthy
+                                    technology acquisitions 2021</h5>
+                                <p class="font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise
+                                    technology
+                                    acquisitions of 2021 so far, in reverse chronological order.</p>
+                            </a>
+                            <a href="#"
+                                class="block p-6 bg-white border border-gray-200 rounded-3xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+
+                                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                    Noteworthy
+                                    technology acquisitions 2021</h5>
+                                <p class="font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise
+                                    technology
+                                    acquisitions of 2021 so far, in reverse chronological order.</p>
+                            </a>
             </div>
-            <div class="p-6 rounded-3xl bg-slate-900">
+            <div class="p-6 rounded-3xl border dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex justify-between items-start">
                     <h2 class="w-40 mb-4 text-2xl font-bold text-gray-900 dark:text-white">Workers</h2>
                     <div id="workers-spinner"><%- include ("../partials/spinner.ejs") %></div>
@@ -100,106 +122,17 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody id="workers-table-body">
-                                    <% workers.forEach(worker=> { %>
-                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                            <th scope="row"
-                                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                <%= worker.id %>
-                                            </th>
-                                            <td class="px-6 py-4">
-                                                <%= worker.first_name %>
-                                                    <%= worker.last_name %>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                </tbody>
+                                <tbody id="workers-table-body"></tbody>
                             </table>
                         </div>
             </div>
         </section>
     </main>
 
-    <script>
-        // implement adding user on client to workers list
-
-        const usersList = document.getElementById('users-show');
-
-        const workersSpinner = document.querySelector("#workers-spinner #spinner");
-
-        const workersInput = document.getElementById("add-worker");
-        workersInput.addEventListener("input", e => {
-            searchUsers(e.target.value);
-        });
-        function displaySearchedUsers(data, val) {
-            if (!val) {
-                usersList.innerHTML = null;
-            } else if (data.length === 0) {
-                const p = document.createElement("p");
-                p.innerHTML = "No users found matching your search criteria.";
-                p.className = "p-4 text-white";
-                usersList.innerHTML = null;
-                usersList.appendChild(p);
-            } else {
-                usersList.innerHTML = null;
-                createUsersList(data);
-            }
-        }
-        const searchUsers = debounce((val) => {
-            if (!val) {
-                usersList.innerHTML = null;
-                return;
-            }
-            workersSpinner.classList.remove("hidden");
-
-            axios.get(`/users?q=${val}&w=worker`)
-                .then(res => {
-                    displaySearchedUsers(res.data, val);
-                    workersSpinner.classList.add("hidden");
-                })
-                .catch(err => console.log(err));
-        }, 250);
-        function debounce(callback, delay) {
-            let timer;
-            return function (val) {
-                clearTimeout(timer)
-                timer = setTimeout(() => {
-                    callback(val);
-                }, delay)
-            }
-        }
-
-        function createUsersList(users) {
-            const ulElement = document.createElement("ul");
-            ulElement.className = "h-full list-none list-inside dark:text-white";
-
-            users.forEach((user, i) => {
-                const liElement = document.createElement("li");
-                liElement.addEventListener("click", () => {
-                    axios.post(`/projects/${window.location.pathname.slice(-2)}/${user.id}`)
-                        .then(res => {
-                            console.log(res.data)
-                            workersSpinner.classList.add("hidden");
-                        })
-                        .catch(err => console.log(err));
-
-                    workersInput.value = "";
-                    usersList.innerHTML = null;
-                });
-
-                if (i !== users.length) {
-                    liElement.className = "p-4 border-b border-gray-400 hover:bg-gray-600 cursor-pointer";
-                } else {
-                    liElement.className = "p-4 hover:bg-gray-600 cursor-pointer";
-                }
-                liElement.textContent = `${user.first_name} ${user.last_name}`;
-                ulElement.appendChild(liElement);
-            });
-
-            usersList.appendChild(ulElement);
-        }
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    <% if (owner.id===user.id || user.role==="admin" ) { %>
+        <%- include("../partials/projects-workers-script.ejs") %>
+            <% } %>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 </body>
 
 </html>

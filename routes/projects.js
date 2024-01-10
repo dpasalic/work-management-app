@@ -60,11 +60,19 @@ router.get("/:id", verifyWorker, async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
+router.post("/:pId/new-task", verifyManager, async (req, res) => {
+    console.log(req.user);
+    // create task and add it to client
+
+    res.json("najs");
+});
 router.post("/:pId/:uId", verifyManager, async (req, res) => {
     try {
-        const result = await db.query("INSERT INTO user_projects VALUES($1, $2)", [parseInt(req.params.uId), parseInt(req.params.pId)]);
+        await db.query("INSERT INTO user_projects VALUES($1, $2)", [parseInt(req.params.uId), parseInt(req.params.pId)]);
+        const worker = await db.query("SELECT * FROM user_projects up INNER JOIN users u ON up.user_id=u.id WHERE u.id=$1", [parseInt(req.params.uId)]);
 
-        res.json(result.rows[0]);
+        res.json(worker.rows[0]);
     } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");

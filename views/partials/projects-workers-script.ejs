@@ -1,0 +1,107 @@
+<script>
+    const usersList = document.getElementById('users-show');
+
+    const workersTableBody = document.getElementById("workers-table-body");
+    const workers = JSON.parse('<%-JSON.stringify(workers)%>');
+    createWorkersTableBody(workers);
+
+    const workersSpinner = document.querySelector("#workers-spinner #spinner");
+
+    const workersInput = document.getElementById("add-worker");
+    workersInput.addEventListener("input", e => {
+        searchUsers(e.target.value);
+    });
+    function displaySearchedUsers(data, val) {
+        if (!val) {
+            usersList.innerHTML = null;
+        } else if (data.length === 0) {
+            const p = document.createElement("p");
+            p.innerHTML = "No users found matching your search criteria.";
+            p.className = "p-4 text-white";
+            usersList.innerHTML = null;
+            usersList.appendChild(p);
+        } else {
+            usersList.innerHTML = null;
+            createUsersList(data);
+        }
+    }
+    const searchUsers = debounce((val) => {
+        if (!val) {
+            usersList.innerHTML = null;
+            return;
+        }
+        workersSpinner.classList.remove("hidden");
+
+        axios.get(`/users?q=${val}&w=worker`)
+            .then(res => {
+                displaySearchedUsers(res.data, val);
+                workersSpinner.classList.add("hidden");
+            })
+            .catch(err => console.log(err));
+    }, 250);
+    function debounce(callback, delay) {
+        let timer;
+        return function (val) {
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                callback(val);
+            }, delay)
+        }
+    }
+
+    function createUsersList(users) {
+        const ulElement = document.createElement("ul");
+        ulElement.className = "h-full list-none list-inside dark:text-white";
+
+        users.forEach((user, i) => {
+            const liElement = document.createElement("li");
+            liElement.addEventListener("click", () => {
+                axios.post(`/projects/${window.location.pathname.slice(-2)}/${user.id}`)
+                    .then(res => {
+                        createWorkersTableRow(res.data);
+                        workersSpinner.classList.add("hidden");
+                    })
+                    .catch(err => console.log(err));
+
+                workersInput.value = "";
+                usersList.innerHTML = null;
+            });
+
+            if (i !== users.length) {
+                liElement.className = "p-4 border-b border-gray-400 hover:bg-gray-600 cursor-pointer";
+            } else {
+                liElement.className = "p-4 hover:bg-gray-600 cursor-pointer";
+            }
+            liElement.textContent = `${user.first_name} ${user.last_name}`;
+            ulElement.appendChild(liElement);
+        });
+
+        usersList.appendChild(ulElement);
+    }
+
+    function createWorkersTableBody(workers) {
+        workers.forEach(worker => {
+            createWorkersTableRow(worker);
+        });
+    }
+
+    function createWorkersTableRow(worker) {
+        const trElement = document.createElement("tr");
+        trElement.className = "bg-white border-b dark:bg-gray-800 dark:border-gray-700";
+
+        const thElement = document.createElement("th");
+        thElement.setAttribute('scope', 'row');
+        thElement.className = "px-6 py-4 font-medium text-gray-900 dark:text-white";
+        thElement.textContent = worker.id;
+
+        trElement.appendChild(thElement);
+
+        const tdElement = document.createElement("td");
+        tdElement.className = "px-6 py-4";
+        tdElement.innerHTML = `${worker.first_name} ${worker.last_name}`;
+
+        trElement.appendChild(tdElement);
+
+        workersTableBody.appendChild(trElement);
+    }
+</script>
