@@ -1,9 +1,6 @@
+<% if (owner.id===user.id || user.role==="admin" ) { %>
 <script>
     const usersList = document.getElementById('users-show');
-
-    const workersTableBody = document.getElementById("workers-table-body");
-    const workers = JSON.parse('<%-JSON.stringify(workers)%>');
-    createWorkersTableBody(workers);
 
     const workersSpinner = document.querySelector("#workers-spinner #spinner");
 
@@ -78,6 +75,14 @@
 
         usersList.appendChild(ulElement);
     }
+</script>
+<% } %>
+<script>
+    const workersTableBody = document.getElementById("workers-table-body");
+    const workers = JSON.parse('<%-JSON.stringify(workers)%>');
+    createWorkersTableBody(workers);
+
+
 
     function createWorkersTableBody(workers) {
         workers.forEach(worker => {
