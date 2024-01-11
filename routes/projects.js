@@ -44,10 +44,7 @@ router.get("/:id", verifyWorker, async (req, res) => {
         const project = await db.query("SELECT * FROM Projects WHERE id=$1", [req.params.id]);
         const owner = await db.query("SELECT * FROM Users WHERE id=$1", [project.rows[0].owner]);
         const workers = await db.query("SELECT * FROM user_projects up INNER JOIN users u ON up.user_id=u.id WHERE up.project_id=$1", [project.rows[0].id]);
-        const tasks = await db.query("SELECT * FROM Users u INNER JOIN Tasks t ON u.id=t.user_id WHERE project_id=$1 ORDER BY t.progress DESC", [req.params.id]);
-
-        // add date to tasks table, order tasks by date created
-        // update js function that creates task dynamically
+        const tasks = await db.query("SELECT * FROM Users u INNER JOIN Tasks t ON u.id=t.user_id WHERE project_id=$1 ORDER BY t.created_at DESC", [req.params.id]);
 
         if (req.user.role === "worker") {
             
@@ -66,12 +63,17 @@ router.get("/:id", verifyWorker, async (req, res) => {
     }
 });
 
-router.post("/:pId/new-task", verifyManager, async (req, res) => {
+router.post("/:pId/tasks/create", verifyManager, async (req, res) => {
     const { name, description, worker } = req.body;
 
     try {
-        const { rows } = await db.query("INSERT INTO Tasks VALUES(DEFAULT, $1, $2, $3, $4, DEFAULT) RETURNING *", [name, description, req.params.pId, worker]);
-        res.json(rows[0]);
+        const task = await db.query("INSERT INTO Tasks VALUES(DEFAULT, $1, $2, $3, $4, DEFAULT) RETURNING *", [name, description, req.params.pId, worker]);
+        const user = await db.query("SELECT first_name, last_name FROM Users WHERE id=$1", [worker]);
+        res.json({
+            ...task.rows[0],
+            ...user.rows[0],
+            project_id: req.params.pId
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json("Internal Server Error");

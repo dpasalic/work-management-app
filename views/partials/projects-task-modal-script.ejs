@@ -20,7 +20,7 @@
             const name = document.getElementById("name");
             const description = document.getElementById("description");
 
-            axios.post(`/projects/<%= project.id %>/new-task`, {
+            axios.post(`/projects/<%= project.id %>/tasks/create`, {
                 name: name.value,
                 description: description.value,
                 worker: assignWorkerInput.value
@@ -30,7 +30,7 @@
                 description.value = "";
                 assignWorkerInput.value = "";
                 document.getElementById("hide-modal").click();
-                tasks.insertBefore(createTaskCard(res.data.name, res.data.description), tasksFirstCard);
+                tasks.insertBefore(createTaskCard(res.data), tasksFirstCard);
             }).catch(err => {
                 console.error(err);
             });
@@ -67,27 +67,77 @@
         }
     });
 
-    function createTaskCard(title, description) {
+    function createTaskCard(task) {
         // Create the anchor element
-        const cardLink = document.createElement("a");
-        cardLink.href = "#";
-        cardLink.className = "block p-6 bg-white border border-gray-200 rounded-3xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700";
+        const anchorElement = document.createElement("a");
+        anchorElement.href = `/projects/${task.project_id}/tasks/${task.id}`;
+        anchorElement.className = "block flex flex-col p-6 bg-white border border-gray-200 rounded-3xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700";
 
         // Create the heading element
-        const heading = document.createElement("h5");
-        heading.className = "mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white";
-        heading.textContent = title;
+        const headingElement = document.createElement("h5");
+        headingElement.className = "mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white";
+        headingElement.textContent = task.name;
 
-        // Create the paragraph element
-        const paragraph = document.createElement("p");
-        paragraph.className = "font-normal text-gray-700 dark:text-gray-400";
-        paragraph.textContent = description;
+        // Create the paragraph element for person information
+        const personParagraph = document.createElement("p");
+        personParagraph.className = "flex items-center gap-1 mb-8 font-normal text-base text-gray-700 dark:text-gray-400";
 
-        // Append the heading and paragraph to the anchor element
-        cardLink.appendChild(heading);
-        cardLink.appendChild(paragraph);
+        // Create the span for the material-symbols-outlined icon
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "material-symbols-outlined";
+        iconSpan.textContent = "person";
 
-        // Return the created card element
-        return cardLink;
+        // Create the span for the person's first and last name
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = `${task.first_name} ${task.last_name}`;
+
+        // Append the spans to the paragraph element
+        personParagraph.appendChild(iconSpan);
+        personParagraph.appendChild(nameSpan);
+
+        // Create the div for progress information
+        const progressDiv = document.createElement("div");
+        progressDiv.className = "mt-auto";
+
+        // Create the div for the progress text and percentage
+        const progressTextDiv = document.createElement("div");
+        progressTextDiv.className = "flex justify-between mb-1";
+
+        // Create the span for "Progress" text
+        const progressTextLabelSpan = document.createElement("span");
+        progressTextLabelSpan.className = "text-base font-medium text-blue-700 dark:text-white";
+        progressTextLabelSpan.textContent = "Progress";
+
+        // Create the span for the progress percentage
+        const progressPercentageSpan = document.createElement("span");
+        progressPercentageSpan.className = "text-sm font-medium text-blue-700 dark:text-white";
+        progressPercentageSpan.textContent = `${task.progress}%`;
+
+        // Append the spans to the progress text div
+        progressTextDiv.appendChild(progressTextLabelSpan);
+        progressTextDiv.appendChild(progressPercentageSpan);
+
+        // Create the div for the progress bar
+        const progressBarDiv = document.createElement("div");
+        progressBarDiv.className = "w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700";
+
+        // Create the inner div for the progress bar with dynamic width
+        const progressBarInnerDiv = document.createElement("div");
+        progressBarInnerDiv.className = "bg-blue-600 h-2.5 rounded-full";
+        progressBarInnerDiv.style.width = `${task.progress}%`;
+
+        // Append the inner div to the progress bar div
+        progressBarDiv.appendChild(progressBarInnerDiv);
+
+        progressDiv.appendChild(progressTextDiv);
+        progressDiv.appendChild(progressBarDiv);
+
+        // Append the heading, person information, progress text, and progress bar to the anchor element
+        anchorElement.appendChild(headingElement);
+        anchorElement.appendChild(personParagraph);
+        anchorElement.appendChild(progressDiv);
+
+        // Append the anchor element to a parent container (replace "containerId" with the actual ID of your container)
+        return anchorElement;
     }
 </script>

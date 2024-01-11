@@ -60,7 +60,7 @@
                     <%- include("../partials/projects-task-modal.ejs") %>
                         <% } %>
                             <% tasks.forEach(task=> { %>
-                                <a href="#"
+                                <a href=<%= `/projects/${project.id}/tasks/${task.id}` %>
                                     class="block flex flex-col p-6 bg-white border border-gray-200 rounded-3xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                                         <%= task.name %>
