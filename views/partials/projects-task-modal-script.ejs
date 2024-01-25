@@ -19,6 +19,11 @@
 
             const name = document.getElementById("name");
             const description = document.getElementById("description");
+            const tasksSection = document.getElementById("tasks-section");
+
+            const allTasksDiv = tasksSection.children[0].children[0];
+            const completedTasksDiv = tasksSection.children[1].children[0];
+            const ongoingTasksDiv = tasksSection.children[2].children[0];
 
             axios.post(`/projects/<%= project.id %>/tasks/create`, {
                 name: name.value,
@@ -31,6 +36,8 @@
                 assignWorkerInput.value = "";
                 document.getElementById("hide-modal").click();
                 tasks.insertBefore(createTaskCard(res.data), tasksFirstCard);
+                allTasksDiv.innerHTML = parseInt(allTasksDiv.textContent) + 1;
+                ongoingTasksDiv.innerHTML = parseInt(ongoingTasksDiv.textContent) + 1;
             }).catch(err => {
                 console.error(err);
             });

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/output.css' />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js"
+        integrity="sha512-JWQFV6OCC2o2x8x46YrEeFEQtzoNV++r9im8O8stv91YwHNykzIS2TbvAlFdeH0GVlpnyd79W0ZGmffcRi++Bw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <title>Task</title>
+</head>
+
+<body class="bg-slate-950 w-screen min-h-screen grid md:items-center">
+    <main class="w-full max-w-md mx-auto">
+        <a href=<%= `/projects/${task.project_id}` %> class="inline-block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"><</a>
+        <div class=" p-6 rounded-3xl border dark:bg-gray-800 dark:border-gray-700">
+            <h1 class="mb-10 text-4xl font-bold text-gray-900 dark:text-white">
+                <%= task.name %>
+            </h1>
+
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-gray-500 dark:text-white">
+                    calendar_month
+                </span>
+                <span class="text-gray-500 dark:text-white">
+                    <%= new Date(task.created_at).toISOString().split("T")[0] %>
+                </span>
+            </div>
+            <div class="flex items-center gap-3 mt-4">
+                <span class="material-symbols-outlined text-gray-500 dark:text-white">
+                    person
+                </span>
+                <span class="text-gray-500 dark:text-white">
+                    <%= owner.first_name %>
+                        <%= owner.last_name %>
+                </span>
+            </div>
+            <div class="text-gray-500 dark:text-white text-justify mt-4">
+                <%= task.description %>
+            </div>
+            <div class="mt-8">
+                <form>
+                    <div class="flex items-center">
+                        <label for="minmax-range" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Task
+                            progress</label>
+                        <div id="progress-range-value"
+                            class="ml-auto mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            <%= task.progress %>%
+                        </div>
+                    </div>
+                    <input id="progress-range" type="range" min="0" max="100" value="<%= task.progress %>"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+                    <div>
+                        <label for="workhours" class="block mt-4 mb-2 text-sm font-medium text-gray-900 dark:text-white">Work hours</label>
+                        <input type="text" id="workhours" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Insert hours you worked since last update" required>
+                    </div>
+                    <button id="submit-button" type="button"
+                        class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Update
+                        progress</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const rangeInput = document.getElementById("progress-range");
+        const hoursInput = document.getElementById("workhours");
+        const rangeInputValue = document.getElementById("progress-range-value");
+        const submitButton = document.getElementById("submit-button");
+
+        rangeInput.addEventListener('input', function () {
+            const currentValue = rangeInput.value;
+            rangeInputValue.textContent = `${currentValue}%`;
+        });
+
+        submitButton.addEventListener("click", () => {
+            axios.patch(`/projects/<%= task.project_id %>/tasks/<%= task.id %>`, { progress: rangeInput.value, hours: hoursInput.value })
+                .then(res => {
+                    submitButton.innerHTML = "Update progress";
+                })
+                .catch(err => {
+                    submitButton.innerHTML = "Update progress"
+                });
+        });
+    </script>
+    <script src="/javascripts/spinner.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+
+</html>

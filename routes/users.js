@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
     try {
         let result;
         if (req.query.w) {
-            result = await db.query("SELECT * FROM Users WHERE role=$1 AND (LOWER(first_name) LIKE $2 OR LOWER(last_name) LIKE $2) ORDER BY id", ["worker", `%${req.query.q}%`]);
+            result = await db.query("SELECT u.* FROM Users as u LEFT JOIN user_projects as up ON u.id=up.user_id WHERE up.user_id IS NULL AND u.role=$1 AND (LOWER(u.first_name) LIKE $2 OR LOWER(u.last_name) LIKE $2) ORDER BY u.id", ["worker", `%${req.query.q}%`]);
         } else if (req.query.q) {
             result = await db.query("SELECT * FROM Users WHERE LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 OR LOWER(email) LIKE $1 ORDER BY id", [`%${req.query.q}%`]);
         } else {
@@ -45,7 +45,8 @@ router.get("/login", (req, res) => {
     res.render("users/login", {
         errors: [],
         getErrorMsg: path => null,
-        formValues: {}
+        formValues: {},
+        user: undefined
     });
 });
 router.post("/login", loginValidate, async (req, res) => {
@@ -55,7 +56,7 @@ router.post("/login", loginValidate, async (req, res) => {
 
         if (rows[0] && bcrypt.compareSync(password, rows[0].password)) {
             const token = generateToken(rows[0]);
-            res.cookie("accessToken", token).redirect("/");
+            res.cookie("accessToken", token).redirect("/projects");
         } else {
             const errors = [{
                 path: "password",
@@ -76,7 +77,16 @@ router.get("/logout", (req, res) => {
     res.clearCookie("accessToken").redirect("login");
 });
 
-router.get("/:id", verifyAdmin, async (req, res) => {
+router.get("/:id", async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM Users WHERE id=$1", [req.params.id]);
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+router.get("/:id/edit", verifyAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         if (id) {

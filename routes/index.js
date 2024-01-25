@@ -4,9 +4,9 @@ const db = require("../db");
 const { verifyAdmin } = require("../public/javascripts/users");
 
 /* GET home page. */
-router.get('/', (req, res, next) => {
-    res.render('index', { title: 'Express' });
-});
+// router.get('/', (req, res, next) => {
+//     res.render('index', { title: 'Express' });
+// });
 
 router.get("/admin_panel", verifyAdmin, async (req, res, next) => {
     try {

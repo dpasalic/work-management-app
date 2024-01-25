@@ -158,6 +158,31 @@ function verifyWorker(req, res, next) {
     next();
 }
 
+async function verifyTaskOwner(req, res, next) {
+    const decoded = verifyToken(req);
+
+    if (!decoded) {
+        return res.status(403).json({ message: "Invalid token" });
+    }
+
+    try {
+        const task = await db.query("SELECT * FROM Tasks WHERE id=$1", [req.params.tId]);
+        const ownerId = task.rows[0].user_id;
+        const owner = await db.query("SELECT * FROM Users WHERE id=$1", [task.rows[0].user_id]);
+        if (decoded.id !== ownerId && decoded.role !== "admin") {
+            return res.status(403).json({ message: "Insufficient permission" });
+        }
+        req.task = task.rows[0];
+        req.owner = owner.rows[0];
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Internal Server Error");
+    }
+
+    req.user = decoded;
+    next();
+}
+
 module.exports = {
     registerValidate,
     loginValidate,
@@ -166,5 +191,6 @@ module.exports = {
     verifyToken,
     verifyAdmin,
     verifyManager,
-    verifyWorker
+    verifyWorker,
+    verifyTaskOwner
 };

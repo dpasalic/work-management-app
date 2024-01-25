@@ -3,9 +3,9 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const db = require("../db");
 const { createValidate } = require("../public/javascripts/projects");
-const { verifyToken, verifyAdmin, verifyManager, verifyWorker } = require("../public/javascripts/users");
+const { verifyToken, verifyAdmin, verifyManager, verifyWorker, verifyTaskOwner } = require("../public/javascripts/users");
 
-router.get("/", async (req, res) => {
+router.get("/", verifyWorker, async (req, res) => {
     try {
         let result;
         if (req.query.q) {
@@ -47,7 +47,7 @@ router.get("/:id", verifyWorker, async (req, res) => {
         const tasks = await db.query("SELECT * FROM Users u INNER JOIN Tasks t ON u.id=t.user_id WHERE project_id=$1 ORDER BY t.created_at DESC", [req.params.id]);
 
         if (req.user.role === "worker") {
-            
+
         }
 
         res.render("projects/read", {
@@ -55,7 +55,8 @@ router.get("/:id", verifyWorker, async (req, res) => {
             owner: owner.rows[0],
             user: req.user,
             workers: workers.rows,
-            tasks: tasks.rows
+            tasks: tasks.rows,
+            user: req.user
         });
     } catch (err) {
         console.log(err);
@@ -69,6 +70,9 @@ router.post("/:pId/tasks/create", verifyManager, async (req, res) => {
     try {
         const task = await db.query("INSERT INTO Tasks VALUES(DEFAULT, $1, $2, $3, $4, DEFAULT) RETURNING *", [name, description, req.params.pId, worker]);
         const user = await db.query("SELECT first_name, last_name FROM Users WHERE id=$1", [worker]);
+
+        await db.query("INSERT INTO Workhours VALUES(DEFAULT, $1, $2, $3, CURRENT_DATE, 0)", [worker, req.params.pId, task.rows[0].id]);
+
         res.json({
             ...task.rows[0],
             ...user.rows[0],
@@ -77,6 +81,20 @@ router.post("/:pId/tasks/create", verifyManager, async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json("Internal Server Error");
+    }
+});
+
+router.patch("/tasks/:tId", verifyWorker, async (req, res) => {
+    try {
+        const result = await db.query("UPDATE Workhours SET hours=hours+$1 WHERE user_id=$2 AND task_id=$3 RETURNING *", [req.body.hours, req.user.id, req.params.tId]);
+        if (result.rows.length !== 0) {
+            res.json("Added successfully");
+        } else {
+            res.json("Adding failed");
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Internal Server Error");
     }
 });
 router.post("/:pId/:uId", verifyManager, async (req, res) => {
@@ -88,6 +106,22 @@ router.post("/:pId/:uId", verifyManager, async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");
+    }
+});
+
+router.get("/:pId/tasks/:tId", verifyTaskOwner, async (req, res) => {
+    res.render("projects/task-read", { task: req.task, owner: req.owner });
+});
+router.patch("/:pId/tasks/:tId", async (req, res) => {
+    try {
+        await db.query("UPDATE Tasks SET progress=$1 WHERE id=$2", [req.body.progress, req.params.tId]);
+        if (req.body.hours) {
+            await db.query("UPDATE Workhours SET hours=hours+$1 WHERE task_id=$2", [req.body.hours, req.params.tId]);
+        }
+        res.json("");
+    } catch (err) {
+        console.log(err);
+        res.status(500).json("Internal Server Error");
     }
 });
 

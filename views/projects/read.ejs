@@ -17,6 +17,7 @@
 </head>
 
 <body class="bg-slate-950 w-screen min-h-screen grid">
+    <%- include("../partials/navigation-in.ejs") %>
     <main class="max-w-7xl mx-auto px-4 py-20">
         <section class="p-6 rounded-3xl border dark:bg-gray-800 dark:border-gray-700">
             <h1 class="mb-8 text-4xl font-bold text-gray-900 dark:text-white">
@@ -54,18 +55,48 @@
             </div>
         </section>
 
+        <section id="tasks-section"
+            class="flex justify-evenly items-start flex-wrap mt-3 p-6 rounded-3xl border dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-white">
+            <div class="flex flex-col justify-center w-2/4 lg:w-auto">
+                <div class="text-4xl lg:text-6xl text-center font-bold">
+                    <%= tasks.length %>
+                </div>
+                <div class="text-lg lg:text-2xl text-center">Tasks</div>
+            </div>
+            <div class="flex flex-col justify-center w-2/4 lg:w-auto">
+                <div id="completed-tasks" class="text-4xl lg:text-6xl text-center font-bold">
+                    
+                </div>
+                <div class="text-lg lg:text-2xl text-center">Completed Tasks</div>
+            </div>
+            <div class="flex flex-col justify-center w-2/4 lg:w-auto">
+                <div id="ongoing-tasks" class="text-4xl lg:text-6xl text-center font-bold">
+                    
+                </div>
+                <div class="text-lg lg:text-2xl text-center">Ongoing Tasks</div>
+            </div>
+            <div class="flex flex-col justify-center w-2/4 lg:w-auto">
+                <div id="workers-number" class="text-4xl lg:text-6xl text-center font-bold">
+                    <%= workers.length %>
+                </div>
+                <div class="text-lg lg:text-2xl text-center">Workers</div>
+            </div>
+        </section>
+
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start mt-3">
             <div id="tasks" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <% if (owner.id===user.id || user.role==="admin" ) { %>
                     <%- include("../partials/projects-task-modal.ejs") %>
                         <% } %>
                             <% tasks.forEach(task=> { %>
-                                <a href=<%= `/projects/${project.id}/tasks/${task.id}` %>
-                                    class="block flex flex-col p-6 bg-white border border-gray-200 rounded-3xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                                <a href=<%=`/projects/${project.id}/tasks/${task.id}` %>
+                                    class="block flex flex-col p-6 bg-white border border-gray-200 rounded-3xl
+                                    hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                                         <%= task.name %>
                                     </h5>
-                                    <p class="flex items-center gap-1 mb-8 font-normal text-base text-gray-700 dark:text-gray-400">
+                                    <p
+                                        class="flex items-center gap-1 mb-8 font-normal text-base text-gray-700 dark:text-gray-400">
                                         <span class="material-symbols-outlined">
                                             person
                                         </span>
@@ -79,10 +110,13 @@
                                         <div class="flex justify-between mb-1">
                                             <span
                                                 class="text-base font-medium text-blue-700 dark:text-white">Progress</span>
-                                            <span class="text-sm font-medium text-blue-700 dark:text-white"><%= task.progress %>%</span>
+                                            <span class="text-sm font-medium text-blue-700 dark:text-white">
+                                                <%= task.progress %>%
+                                            </span>
                                         </div>
                                         <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                            <div class="bg-blue-600 h-2.5 rounded-full" style="<%= `width: ${task.progress}%` %>"></div>
+                                            <div class="bg-blue-600 h-2.5 rounded-full"
+                                                style="<%= `width: ${task.progress}%` %>"></div>
                                         </div>
                                     </div>
                                 </a>
@@ -138,7 +172,8 @@
 
     <%- include("../partials/projects-task-modal-script.ejs") %>
         <%- include("../partials/projects-workers-script.ejs") %>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+            <%- include("../partials/tasks-helpers.ejs") %>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 </body>
 
 </html>

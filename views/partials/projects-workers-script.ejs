@@ -31,6 +31,7 @@
 
         axios.get(`/users?q=${val}&w=worker`)
             .then(res => {
+                console.log(res.data)
                 displaySearchedUsers(res.data, val);
                 workersSpinner.classList.add("hidden");
             })
@@ -53,12 +54,18 @@
         users.forEach((user, i) => {
             const liElement = document.createElement("li");
             liElement.addEventListener("click", () => {
+                const workersNumber = document.getElementById("workers-number");
+                workersSpinner.classList.remove("hidden");
                 axios.post(`/projects/${window.location.pathname.slice(-2)}/${user.id}`)
                     .then(res => {
                         createWorkersTableRow(res.data);
                         workersSpinner.classList.add("hidden");
+                        workersNumber.innerHTML = parseInt(workersNumber.textContent) + 1;
                     })
-                    .catch(err => console.log(err));
+                    .catch(err => {
+                        console.log(err);
+                        workersSpinner.classList.add("hidden");
+                    });
 
                 workersInput.value = "";
                 usersList.innerHTML = null;

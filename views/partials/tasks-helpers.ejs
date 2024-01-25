@@ -1,0 +1,29 @@
+<script>
+    function countCompletedTasks(tasks) {
+        let count = 0;
+        tasks.forEach(task => {
+            if (task.progress === 100) {
+                count++;
+            }
+        });
+
+        return count;
+    }
+
+    const tasks = JSON.parse('<%-JSON.stringify(tasks)%>');
+    document.getElementById("completed-tasks").innerHTML = countCompletedTasks(tasks);
+
+    function countOngoingTasks(tasks) {
+        let count = 0;
+        tasks.forEach(task => {
+            if (task.progress !== 100) {
+                count++;
+            }
+        });
+
+        return count;
+    }
+
+    document.getElementById("ongoing-tasks").innerHTML = countOngoingTasks(tasks);
+
+</script>
